@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "758963706432",
+    "project_id": "bags-shop-7fa1f",
+    "storage_bucket": "bags-shop-7fa1f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:758963706432:android:ee3f62a2d8481c31d6dda5",
+        "android_client_info": {
+          "package_name": "com.example.appxfirebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDe8bKRMiuWcXjnhvRrAsAWUVqKgF4KCto"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:758963706432:android:4c85daa18254591fd6dda5",
+        "android_client_info": {
+          "package_name": "com.example.shop_bags"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDe8bKRMiuWcXjnhvRrAsAWUVqKgF4KCto"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
