@@ -1,4 +1,6 @@
-import 'package:appxfirebase/view/auth/firebase/firebase_firestor_con.dart';
+import 'dart:developer';
+
+import 'package:appxfirebase/model/product_model.dart';
 import 'package:appxfirebase/view/auth/screen/login_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -52,27 +54,29 @@ class _HomeScreenState extends State<HomeScreen> {
         stream: productRef.snapshots(),
         builder: (context, snapshot) {
           return snapshot.hasError
-              ? Center(
+              ? const Center(
                   child: Icon(
                     Icons.info,
                     color: Colors.red,
                   ),
                 )
               : snapshot.connectionState == ConnectionState.waiting
-                  ? Center(
+                  ? const Center(
                       child: CircularProgressIndicator(),
                     )
                   : ListView.builder(
                       itemCount: snapshot.data!.docs.length,
                       itemBuilder: (context, index) {
-                        Map<String, dynamic> product =
+                        ProductModel product = ProductModel.fromFireBase(
                             snapshot.data!.docs[index].data()
-                                as Map<String, dynamic>;
+                                as Map<String, dynamic>);
+
                         return ListTile(
                           leading: CircleAvatar(
-                            backgroundImage: NetworkImage(product['image']),
+                            backgroundImage:
+                                NetworkImage(product.image.toString()),
                           ),
-                          title: Text(product['name']),
+                          title: Text(product.name.toString()),
                         );
                       },
                     );
