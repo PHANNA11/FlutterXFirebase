@@ -1,4 +1,6 @@
+import 'package:appxfirebase/view/auth/firebase/firebase_firestor_con.dart';
 import 'package:appxfirebase/view/auth/screen/login_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -12,30 +14,69 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  CollectionReference productRef =
+      FirebaseFirestore.instance.collection('Products');
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: Drawer(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            CupertinoButton(
+              color: Colors.blue,
+              child: const Text('Log Out'),
+              onPressed: () async {
+                await FirebaseAuthController().logOut().then((value) {
+                  if (value) {
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginScreen(),
+                        ),
+                        (route) => false);
+                  }
+                });
+              },
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+          ],
+        ),
+      ),
       appBar: AppBar(
         title: const Text('Home Screen'),
       ),
-      body: Center(
-        child: CupertinoButton(
-          color: Colors.blue,
-          child: const Text('Log Out'),
-          onPressed: () async {
-            // TODO : Log Out
-            await FirebaseAuthController().logOut().then((value) {
-              if (value) {
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LoginScreen(),
-                    ),
-                    (route) => false);
-              }
-            });
-          },
-        ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: productRef.snapshots(),
+        builder: (context, snapshot) {
+          return snapshot.hasError
+              ? Center(
+                  child: Icon(
+                    Icons.info,
+                    color: Colors.red,
+                  ),
+                )
+              : snapshot.connectionState == ConnectionState.waiting
+                  ? Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : ListView.builder(
+                      itemCount: snapshot.data!.docs.length,
+                      itemBuilder: (context, index) {
+                        Map<String, dynamic> product =
+                            snapshot.data!.docs[index].data()
+                                as Map<String, dynamic>;
+                        return ListTile(
+                          leading: CircleAvatar(
+                            backgroundImage: NetworkImage(product['image']),
+                          ),
+                          title: Text(product['name']),
+                        );
+                      },
+                    );
+        },
       ),
     );
   }
