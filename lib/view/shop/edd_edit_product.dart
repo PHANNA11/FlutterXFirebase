@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:appxfirebase/model/product_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../widget/form_widget.dart';
 import '../auth/firebase/firebase_firestor_con.dart';
@@ -25,6 +29,7 @@ class _AddEditProductState extends State<AddEditProduct> {
   TextEditingController priceController = TextEditingController();
   TextEditingController imageController = TextEditingController();
   TextEditingController descController = TextEditingController();
+  File? fileImage;
   void setInitData() {
     setState(() {
       nameController.text = widget.pro!.name!;
@@ -75,6 +80,67 @@ class _AddEditProductState extends State<AddEditProduct> {
                 .buildForm(controller: sizeController, hintText: 'Enter Size'),
             ShopWidget().buildForm(
                 controller: priceController, hintText: 'Enter Price'),
+            GestureDetector(
+              onTap: () async {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (context) => SizedBox(
+                    height: 150,
+                    child: Column(
+                      children: [
+                        ListTile(
+                          onTap: () async {
+                            openCameraAndGallary(
+                                imageSource: ImageSource.camera);
+                          },
+                          leading: const Icon(Icons.camera_alt),
+                          title: const Text('Camera'),
+                        ),
+                        ListTile(
+                          onTap: () async {
+                            openCameraAndGallary(
+                                imageSource: ImageSource.gallery);
+                          },
+                          leading: const Icon(Icons.image),
+                          title: const Text('Gallay'),
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              },
+              child: Container(
+                margin: const EdgeInsets.all(8),
+                height: 180,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.grey),
+                    image: fileImage == null
+                        ? null
+                        : DecorationImage(
+                            fit: BoxFit.cover,
+                            image: FileImage(File(fileImage!.path)))),
+                child: fileImage == null
+                    ? Center(
+                        child: Container(
+                          margin: const EdgeInsets.all(8),
+                          height: 80,
+                          width: 80,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.grey)),
+                          child: const Center(
+                            child: Icon(
+                              Icons.image_rounded,
+                              size: 40,
+                            ),
+                          ),
+                        ),
+                      )
+                    : null,
+              ),
+            ),
             ShopWidget().buildForm(
                 controller: imageController,
                 hintText: 'Enter Image Link',
@@ -145,5 +211,35 @@ class _AddEditProductState extends State<AddEditProduct> {
         ),
       ),
     );
+  }
+
+  void openCameraAndGallary({ImageSource? imageSource}) async {
+    var image = await ImagePicker()
+        .pickImage(source: imageSource ?? ImageSource.gallery);
+    setState(() {
+      fileImage = File(image!.path);
+    });
+    uploadImage();
+    // ignore: use_build_context_synchronously
+    Navigator.pop(context);
+  }
+
+  bool isLoading = false;
+  final storageRef = FirebaseStorage.instance.ref();
+  void uploadImage() async {
+    var imagePath = storageRef
+        .child('/images/products')
+        .child('/${DateTime.now().microsecondsSinceEpoch}.png');
+
+    try {
+      await imagePath.putFile(File(fileImage!.path));
+      await imagePath.getDownloadURL().then((value) {
+        setState(() {
+          imageController.text = value;
+        });
+      });
+    } on FirebaseException catch (e) {
+      // ...
+    }
   }
 }
